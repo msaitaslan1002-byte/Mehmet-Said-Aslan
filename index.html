@@ -3,27 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI & Korku Platform</title>
+<title>Karanlık AI Terminal</title>
 <style>
-body, html {margin:0; padding:0; width:100%; height:100%; font-family: monospace; background:black; color:#0f0; overflow:hidden;}
-header{position:fixed;top:0;width:100%;padding:20px;text-align:center;background:#111;color:#0f0;z-index:1000;}
-#searchBar{width:60%;max-width:400px;padding:12px;font-size:18px;border-radius:8px;border:none;outline:none;}
-#products{position:absolute;top:120px;width:100%;display:flex;flex-wrap:wrap;justify-content:center;}
+html, body {margin:0;padding:0;width:100%;height:100%;background:black;color:#0f0;font-family:monospace;overflow:hidden;}
+header{position:fixed;top:0;width:100%;padding:15px;text-align:center;background:#111;color:#0f0;z-index:1000;}
+#searchBar{width:60%;max-width:400px;padding:10px;font-size:18px;border-radius:8px;border:none;outline:none;}
+#products{position:absolute;top:100px;width:100%;display:flex;flex-wrap:wrap;justify-content:center;}
 .product{background:#111;border:1px solid #0f0;margin:10px;padding:10px;width:180px;border-radius:8px;box-shadow:0 0 10px #0f0;text-align:center;}
 .product img{width:100%;height:120px;object-fit:cover;border-radius:5px;}
-#terminal{position:fixed;top:0;left:0;width:100%;height:100%;padding:20px;box-sizing:border-box;background:black;color:#0f0;display:none;overflow-y:auto;white-space:pre-wrap;z-index:5000;font-weight:600;}
+#terminal{position:fixed;top:0;left:0;width:100%;height:100%;padding:20px;box-sizing:border-box;background:black;color:#0f0;display:none;overflow-y:auto;white-space:pre-wrap;z-index:5000;font-weight:600;font-size:18px;}
 #overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:black;display:flex;justify-content:center;align-items:center;z-index:10000;}
 #startBtn{font-size:100px;color:red;cursor:pointer;border:5px solid red;border-radius:50%;width:150px;height:150px;line-height:140px;text-align:center;font-weight:900;box-shadow:0 0 40px red;}
 #errorScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,0,0,0.85);color:black;font-size:56px;font-weight:900;text-align:center;line-height:100vh;display:none;z-index:10001;}
 #warningMarks{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10002;}
 .mark{position:absolute;color:red;font-weight:900;font-size:24px;animation:markBlink 1.2s infinite;}
 @keyframes markBlink{0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
+#nameBox{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);padding:20px 50px;border:4px solid #0f0;color:#0f0;font-size:48px;font-weight:bold;background:black;z-index:900;user-select:none;opacity:1;transition:opacity 0.5s ease;}
+#nameBox.red{color:red;animation:fastBlink 0.25s infinite;}
+@keyframes fastBlink{0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
 </style>
 </head>
 <body>
 
 <header>
-<h1>AI & Korku Platform</h1>
+<h1>Karanlık AI Terminal</h1>
 <p>Ürün ara ve terminal efektini başlat!</p>
 <input type="text" id="searchBar" placeholder="Ürün ara...">
 </header>
@@ -34,6 +37,7 @@ header{position:fixed;top:0;width:100%;padding:20px;text-align:center;background
 <div id="startBtn">×</div>
 </div>
 
+<div id="nameBox">@MHMTXASLAN</div>
 <div id="terminal"></div>
 <div id="errorScreen">⚠ SİSTEM HATASI ⚠</div>
 <div id="warningMarks"></div>
@@ -47,7 +51,13 @@ const products=[
 {name:"Akıllı Saat",desc:"Adım sayar",img:"https://via.placeholder.com/200x150?text=Saat"},
 {name:"Laptop",desc:"Oyun ve iş",img:"https://via.placeholder.com/200x150?text=Laptop"},
 {name:"Drone",desc:"Hava çekimi",img:"https://via.placeholder.com/200x150?text=Drone"},
-{name:"VR Gözlük",desc:"Sanal gerçeklik",img:"https://via.placeholder.com/200x150?text=VR"}];
+{name:"VR Gözlük",desc:"Sanal gerçeklik",img:"https://via.placeholder.com/200x150?text=VR"},
+{name:"Telefon",desc:"Yeni nesil akıllı telefon",img:"https://via.placeholder.com/200x150?text=Telefon"},
+{name:"Tablet",desc:"Taşınabilir bilgisayar",img:"https://via.placeholder.com/200x150?text=Tablet"},
+{name:"Kamera",desc:"Profesyonel çekim",img:"https://via.placeholder.com/200x150?text=Kamera"},
+{name:"Hoparlör",desc:"Güçlü bas",img:"https://via.placeholder.com/200x150?text=Hoparlör"},
+{name:"Mouse",desc:"Hassas kontrol",img:"https://via.placeholder.com/200x150?text=Mouse"}
+];
 
 const productsContainer=document.getElementById('products');
 const searchBar=document.getElementById('searchBar');
@@ -58,6 +68,7 @@ const errorScreen=document.getElementById('errorScreen');
 const warningMarks=document.getElementById('warningMarks');
 const beep=document.getElementById('beep');
 const alarm=document.getElementById('alarm');
+const nameBox=document.getElementById('nameBox');
 
 function displayProducts(list){
 productsContainer.innerHTML='';
@@ -77,15 +88,40 @@ displayProducts(filtered);
 });
 
 const terminalMessages=[
-"BAĞLANTI KURULUYOR...",
 "SİSTEM TARANIYOR...",
+"VERİLER ANALİZ EDİLİYOR...",
 "GÜVENLİK AÇIĞI BULUNDU...",
 "KÖK ERİŞİM SAĞLANDI...",
-"PORTLAR AÇILIYOR...",
-"İŞLEM TAMAMLANIYOR..."
+"SUNUCU ELE GEÇİRİLDİ...",
+"FIREWALL BAYPAS EDİLİYOR...",
+"VERİLER ŞİFRELİLENİYOR...",
+"İŞLEM TAMAMLANIYOR...",
+"KODLAR DEŞİFRE EDİLİYOR...",
+"AĞ TRAFİĞİ İZLENİYOR...",
+"ŞİFRELER KIRILIYOR...",
+"ROOTKIT YÜKLENİYOR...",
+"SİSTEM LOGLARI SİLİNİYOR...",
+"ARAYÜZ KAPANDI...",
+"KULLANICI HESABI ELE GEÇİRİLDİ...",
+"GİZLİ DOSYALAR AÇILIYOR...",
+"ŞİFRE KORUMALARI BAYPAS EDİLİYOR...",
+"VERİLER ÇALINIYOR...",
+"SUNUCUYA GERİ DÖNÜŞ YOK...",
+"İŞLEM BAŞARILI...",
+"GÜVENLİK DUVARI ÇÖKTÜ...",
+"KOMUT SATIRI ELDE EDİLDİ...",
+"VERİ TABANI ELE GEÇİRİLDİ...",
+"BİLGİLER İNDİRİLİYOR...",
+"HACKER GİRİŞİ ONAYLANDI...",
+"TEHDİT SEVİYESİ: KRİTİK...",
+"KAMERA KAPANDI...",
+"SES KAYDI ALINIYOR...",
+"TÜM PORTLAR AÇIK...",
+"YENİ GİRİŞLER ENGELLENDİ...",
+"SİSTEM ELE GEÇİRİLDİ..."
 ];
 
-function createWarningMarks(count=30){
+function createWarningMarks(count=50){
 warningMarks.innerHTML='';
 for(let i=0;i<count;i++){
 const mark=document.createElement('div');
@@ -94,6 +130,7 @@ mark.textContent='!';
 mark.style.top=Math.random()*100+'vh';
 mark.style.left=Math.random()*100+'vw';
 mark.style.fontSize=(12+Math.random()*30)+'px';
+mark.style.animationDelay=(Math.random()*1.2)+'s';
 warningMarks.appendChild(mark);
 }
 }
@@ -104,6 +141,7 @@ function stopBeep(){clearInterval(beepInterval);}
 
 function startTerminal(){
 overlay.style.display='none';
+nameBox.style.opacity=0;
 terminal.style.display='block';
 terminal.innerText='';
 let idx=0;
@@ -113,18 +151,19 @@ if(idx>=terminalMessages.length){clearInterval(interval);stopBeep();startError()
 terminal.innerText+=terminalMessages[idx]+"\n";
 terminal.scrollTop=terminal.scrollHeight;
 idx++;
-},700);
+},500);
+nameBox.classList.add('red');
 }
 
 function startError(){
 alarm.play();
 errorScreen.style.display='block';
-createWarningMarks(40);
+createWarningMarks(60);
 setTimeout(()=>{
 errorScreen.style.display='none';
 warningMarks.innerHTML='';
 alert("Sistem Hatası Tamamlandı!");
-},8000);
+},10000);
 }
 
 startBtn.onclick=startTerminal;
