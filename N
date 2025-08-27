@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hacker Animasyonu</title>
+<style>
+body {margin:0;padding:0;background:black;color:#0f0;font-family:monospace;overflow:hidden;}
+#overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:black;display:flex;justify-content:center;align-items:center;z-index:9999;}
+#closeBtn{font-size:100px;color:red;cursor:pointer;border:5px solid red;border-radius:50%;width:150px;height:150px;line-height:140px;text-align:center;font-weight:900;box-shadow:0 0 40px red;}
+#nameBox{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);padding:20px 50px;border:4px solid #0f0;color:#0f0;font-size:48px;font-weight:bold;background:black;z-index:900;opacity:1;transition:0.5s;}
+#nameBox.red{color:red;animation:blink 0.25s infinite;}
+@keyframes blink{0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
+#terminal{position:fixed;top:10px;left:10px;right:10px;bottom:10px;padding:20px;background:black;color:#0f0;font-size:20px;line-height:1.5em;white-space:pre-wrap;overflow-y:auto;display:none;font-weight:600;}
+#errorScreen{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,0,0,0.85);color:black;font-size:56px;font-weight:900;text-align:center;line-height:100vh;display:none;z-index:10000;}
+</style>
+</head>
+<body>
+
+<div id="overlay"><div id="closeBtn">×</div></div>
+<div id="nameBox">@MHMTXASLAN</div>
+<div id="terminal"></div>
+<div id="errorScreen">SİSTEM HATASI</div>
+
+<script>
+const closeBtn=document.getElementById('closeBtn');
+const overlay=document.getElementById('overlay');
+const nameBox=document.getElementById('nameBox');
+const terminal=document.getElementById('terminal');
+const errorScreen=document.getElementById('errorScreen');
+
+const messages=[
+"SİSTEM TARANIYOR...",
+"VERİLER ANALİZ EDİLİYOR...",
+"GÜVENLİK AÇIĞI BULUNDU...",
+"KÖK ERİŞİM SAĞLANDI...",
+"SUNUCU ELE GEÇİRİLDİ...",
+"FIREWALL BAYPAS EDİLİYOR...",
+"VERİLER ŞİFRELİLENİYOR...",
+"İŞLEM TAMAMLANIYOR..."
+];
+
+closeBtn.onclick=()=>{
+  overlay.style.display='none';
+  nameBox.classList.add('red');
+  setTimeout(()=>{
+    nameBox.classList.remove('red');
+    terminal.style.display='block';
+    startTerminal();
+  },3000);
+};
+
+function startTerminal(){
+  let i=0;
+  const interval=setInterval(()=>{
+    if(i>=messages.length){
+      clearInterval(interval);
+      errorScreen.style.display='block';
+      return;
+    }
+    terminal.innerText+=messages[i]+"\n";
+    terminal.scrollTop=terminal.scrollHeight;
+    i++;
+  },500);
+}
+</script>
+
+</body>
+</html>
