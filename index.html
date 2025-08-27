@@ -3,88 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚠ Kritik Sistem Tarama ⚠</title>
+<title>AI & Korku Ürün Platformu</title>
 <style>
-body {
-  margin:0;
-  padding:0;
-  height:100vh;
-  width:100vw;
-  background:black;
-  color:#0f0;
-  font-family:monospace;
-  overflow:hidden;
+/* ---------------- Genel Temel ---------------- */
+body, html {margin:0; padding:0; width:100%; height:100%; font-family: monospace; background:black; color:#0f0; overflow:hidden;}
+header{position:fixed;top:0;width:100%;padding:20px;text-align:center;background:#111;color:#0f0;z-index:1000;}
+h1,h2,h3{margin:0; padding:0;}
+#hero{position:absolute;top:80px;width:100%;text-align:center;}
+#searchBar{width:60%;max-width:400px;padding:12px;font-size:18px;border-radius:8px;border:none;outline:none;}
+#products{position:absolute;top:160px;width:100%;display:flex;flex-wrap:wrap;justify-content:center;}
+.product{background:#111;border:1px solid #0f0;margin:10px;padding:10px;width:180px;border-radius:8px;box-shadow:0 0 10px #0f0;text-align:center;}
+.product img{width:100%;height:120px;object-fit:cover;border-radius:5px;}
+.product h3{margin:10px 0 5px 0;}
+.product p{font-size:14px;color:#0f0;}
+/* ---------------- Terminal Efekti ---------------- */
+#terminal{position:fixed;top:0;left:0;width:100%;height:100%;padding:20px;box-sizing:border-box;background:black;color:#0f0;display:none;overflow-y:auto;white-space:pre-wrap;z-index:5000;font-weight:600;}
+#terminal.tv-effect{animation:tvShake 0.15s infinite alternate;}
+@keyframes tvShake{
+0%{transform:translate(0,0);}
+25%{filter:contrast(1.2) brightness(1.1) blur(0.6px);transform:translate(1px,-1px);}
+50%{filter:contrast(1.5) brightness(1.3) blur(1.2px);transform:translate(-1px,1px);}
+75%{filter:contrast(1.1) brightness(1) blur(0.3px);transform:translate(1px,1px);}
+100%{filter:none;transform:translate(0,0);}
 }
-#overlay {
-  position:fixed; top:0; left:0;
-  width:100%; height:100%;
-  background:black;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-}
-#startBtn {
-  font-size:80px;
-  color:red;
-  cursor:pointer;
-  border:5px solid red;
-  border-radius:50%;
-  width:160px;
-  height:160px;
-  line-height:150px;
-  text-align:center;
-  font-weight:900;
-  box-shadow:0 0 40px red;
-}
-#terminal {
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  padding:20px;
-  background:black;
-  color:#0f0;
-  font-size:22px;
-  line-height:1.6em;
-  white-space:pre-wrap;
-  overflow-y:auto;
-  display:none;
-  font-weight:600;
-}
-#errorScreen {
-  position:fixed;
-  top:0; left:0; width:100%; height:100%;
-  background:rgba(255,0,0,0.85);
-  color:black;
-  font-size:56px;
-  font-weight:900;
-  text-align:center;
-  line-height:100vh;
-  display:none;
-  z-index:10000;
-  animation:flash 1s infinite;
-}
-@keyframes flash {
-  0%,50%,100%{opacity:1;}
-  25%,75%{opacity:0;}
-}
+/* ---------------- Overlay ve Başlat Butonu ---------------- */
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:black;display:flex;justify-content:center;align-items:center;z-index:10000;}
+#startBtn{font-size:100px;color:red;cursor:pointer;border:5px solid red;border-radius:50%;width:150px;height:150px;line-height:140px;text-align:center;font-weight:900;box-shadow:0 0 40px red;}
+/* ---------------- Error Screen ---------------- */
+#errorScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,0,0,0.85);color:black;font-size:56px;font-weight:900;text-align:center;line-height:100vh;display:none;z-index:10001;animation:errorFlash 1s infinite;}
+@keyframes errorFlash{0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
+/* ---------------- Uyarı işaretleri ---------------- */
+#warningMarks{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10002;}
+.mark{position:absolute;color:red;font-weight:900;font-size:24px;animation:markBlink 1.2s infinite;}
+@keyframes markBlink{0%,50%,100%{opacity:1;}25%,75%{opacity:0;}}
 </style>
 </head>
 <body>
 
+<header>
+<h1>AI & KORKU ÜRÜN PLATFORMU</h1>
+<p>Arama yap, yapay zekâ simülasyonu ve terminal efekti başlasın!</p>
+</header>
+
+<div id="hero">
+<input type="text" id="searchBar" placeholder="Ürün ara...">
+</div>
+
+<div id="products"></div>
+
 <div id="overlay">
-  <div id="startBtn">×</div>
+<div id="startBtn">×</div>
 </div>
 
 <div id="terminal"></div>
 <div id="errorScreen">⚠ SİSTEM HATASI ⚠</div>
+<div id="warningMarks"></div>
+
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
 
 <script>
-const startBtn=document.getElementById('startBtn');
+// ---------------- Ürün verisi ----------------
+const products=[
+{name:"Kablosuz Kulaklık",desc:"Yüksek kalite ses",img:"https://via.placeholder.com/200x150?text=Kulaklık"},
+{name:"Akıllı Saat",desc:"Adım sayar ve bildirimler",img:"https://via.placeholder.com/200x150?text=Akıllı+Saat"},
+{name:"Dizüstü Bilgisayar",desc:"Oyun ve iş için",img:"https://via.placeholder.com/200x150?text=Dizüstü"},
+{name:"Oyun Konsolu",desc:"Son teknoloji oyun deneyimi",img:"https://via.placeholder.com/200x150?text=Konsol"},
+{name:"Kablosuz Şarj",desc:"Hızlı ve güvenli",img:"https://via.placeholder.com/200x150?text=Şarj"},
+{name:"Drone",desc:"Hava fotoğrafçılığı",img:"https://via.placeholder.com/200x150?text=Drone"},
+{name:"VR Gözlük",desc:"Sanal gerçeklik deneyimi",img:"https://via.placeholder.com/200x150?text=VR"},
+{name:"Akıllı Ampul",desc:"Ev otomasyonu",img:"https://via.placeholder.com/200x150?text=Ampul"},
+{name:"Gaming Mouse",desc:"Profesyonel oyun deneyimi",img:"https://via.placeholder.com/200x150?text=Mouse"},
+{name:"Mikrofon",desc:"Yayın ve kayıt için",img:"https://via.placeholder.com/200x150?text=Mikrofon"},
+{name:"Tablet",desc:"Taşınabilir çalışma ve oyun",img:"https://via.placeholder.com/200x150?text=Tablet"},
+{name:"E-kitap Okuyucu",desc:"Kitapları dijital oku",img:"https://via.placeholder.com/200x150?text=E-kitap"},
+{name:"Fitness Bilekliği",desc:"Sağlık takip cihazı",img:"https://via.placeholder.com/200x150?text=Bileklik"},
+{name:"Akıllı Kilit",desc:"Ev güvenliği",img:"https://via.placeholder.com/200x150?text=Kilid"},
+{name:"Bluetooth Hoparlör",desc:"Taşınabilir müzik",img:"https://via.placeholder.com/200x150?text=Hoparlör"},
+{name:"Projeksiyon",desc:"Ev sinema sistemi",img:"https://via.placeholder.com/200x150?text=Projeksiyon"},
+{name:"Kamera",desc:"Güvenlik ve kayıt",img:"https://via.placeholder.com/200x150?text=Kamera"},
+{name:"Elektrikli Scooter",desc:"Şehir içi ulaşım",img:"https://via.placeholder.com/200x150?text=Scooter"},
+{name:"Oyun Klavyesi",desc:"RGB ışıklı mekanik",img:"https://via.placeholder.com/200x150?text=Klavye"},
+{name:"Dijital Saat",desc:"Minimal tasarım",img:"https://via.placeholder.com/200x150?text=Dijital+Saat"}
+];
+
+// ---------------- DOM Elemanları ----------------
+const productsContainer=document.getElementById('products');
+const searchBar=document.getElementById('searchBar');
 const overlay=document.getElementById('overlay');
+const startBtn=document.getElementById('startBtn');
 const terminal=document.getElementById('terminal');
 const errorScreen=document.getElementById('errorScreen');
+const warningMarks=document.getElementById('warningMarks');
+const beep=document.getElementById('beep');
+const alarm=document.getElementById('alarm');
 
-const messages=[
+// ---------------- Ürünleri Göster ----------------
+function displayProducts(filtered){
+productsContainer.innerHTML='';
+filtered.forEach(p=>{
+  const div=document.createElement('div');
+  div.classList.add('product');
+  div.innerHTML=`<img src="${p.img}" alt="${p.name}"><h3>${p.name}</h3><p>${p.desc}</p>`;
+  productsContainer.appendChild(div);
+});
+}
+displayProducts(products);
+
+// ---------------- Arama ----------------
+searchBar.addEventListener('input',e=>{
+  const term=e.target.value.toLowerCase();
+  const filtered=products.filter(p=>p.name.toLowerCase().includes(term)||p.desc.toLowerCase().includes(term));
+  displayProducts(filtered);
+});
+
+// ---------------- Terminal Mesajları ----------------
+const terminalMessages=[
 "BAĞLANTI KURULUYOR...",
 "SİSTEM TARANIYOR...",
 "VERİLER ŞİFRELİLENİYOR...",
@@ -94,29 +128,42 @@ const messages=[
 "İŞLEM TAMAMLANIYOR...",
 "ROOTKIT YÜKLENİYOR...",
 "KODLAR DEŞİFRE EDİLİYOR...",
-"TEHDİT SEVİYESİ: KRİTİK..."
+"TEHDİT SEVİYESİ: KRİTİK...",
+"ŞİFRELER KIRILIYOR...",
+"PORTLAR AÇILIYOR...",
+"YENİ GİRİŞLER ENGELLENDİ...",
+"VERİLER İNDİRİLİYOR...",
+"SİSTEM ELE GEÇİRİLDİ...",
+"KULLANICI HESABI ELE GEÇİRİLDİ...",
+"FİREWALL BAYPAS EDİLİYOR...",
+"LOGLAR SİLİNİYOR...",
+"KAMERA KAPANDI...",
+"SES KAYDI ALINIYOR..."
 ];
 
-startBtn.onclick=()=>{
-  overlay.style.display='none';
-  terminal.style.display='block';
-  startTerminal();
-};
-
-function startTerminal(){
-  let i=0;
-  const interval=setInterval(()=>{
-    if(i>=messages.length){
-      clearInterval(interval);
-      errorScreen.style.display='block';
-      return;
-    }
-    terminal.innerText+=messages[i]+"\n\n";
-    terminal.scrollTop=terminal.scrollHeight;
-    i++;
-  },500);
+// ---------------- Uyarı İşaretleri ----------------
+function createWarningMarks(count=60){
+warningMarks.innerHTML='';
+for(let i=0;i<count;i++){
+  const mark=document.createElement('div');
+  mark.classList.add('mark');
+  mark.textContent='!';
+  mark.style.top=Math.random()*100+'vh';
+  mark.style.left=Math.random()*100+'vw';
+  mark.style.fontSize=(12+Math.random()*30)+'px';
+  mark.style.animationDelay=(Math.random()*1.2)+'s';
+  warningMarks.appendChild(mark);
 }
-</script>
+}
 
-</body>
-</html>
+// ---------------- Sesler ----------------
+let beepInterval;
+function startBeep(){
+beepInterval=setInterval(()=>{beep.currentTime=0;beep.play();},500);
+}
+function stopBeep(){clearInterval(beepInterval);}
+
+// ---------------- Terminal Başlat ----------------
+function startTerminal(){
+terminal.style.display='block';
+terminal.classList.add('tv
