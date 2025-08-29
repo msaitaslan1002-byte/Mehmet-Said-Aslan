@@ -11,21 +11,27 @@
       font-family: monospace;
       overflow: hidden;
     }
-    /* Dünya animasyonu arka plan */
+
+    /* Dünya haritası arka plan */
     #world {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, #001 0%, #000 70%);
+      background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/2000px-World_map_-_low_resolution.svg.png")
+                  no-repeat center center;
+      background-size: cover;
       overflow: hidden;
       z-index: 0;
+      filter: brightness(0.3);
     }
+
+    /* Noktalar */
     .dot {
       position: absolute;
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: red;
       box-shadow: 0 0 8px red;
@@ -35,6 +41,8 @@
       from { opacity: 0.4; }
       to { opacity: 1; }
     }
+
+    /* Çizgiler */
     .line {
       position: absolute;
       height: 2px;
@@ -43,40 +51,19 @@
       transform-origin: left center;
     }
 
-    /* Arama motoru */
-    .search {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      background: rgba(0,0,0,0.8);
-      border: 2px solid #0f0;
-      border-radius: 6px;
-      padding: 8px;
-    }
-    .search input {
-      background: black;
-      border: none;
-      outline: none;
-      color: #0f0;
-      font-size: 18px;
-      width: 300px;
-    }
-
     /* Terminal yazıları */
     .terminal {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      max-height: 40%;
+      max-height: 45%;
       overflow: hidden;
       padding: 10px;
       color: #00ff00;
       font-size: 15px;
       z-index: 1;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
     }
     .terminal-line {
       margin: 2px 0;
@@ -92,21 +79,17 @@
 </head>
 <body>
   <div id="world"></div>
-
-  <!-- Arama Motoru -->
-  <div class="search">
-    <input type="text" placeholder="Ara..." id="searchBox">
-  </div>
-
-  <!-- Terminal -->
   <div class="terminal" id="terminal"></div>
 
   <script>
-    // Noktalar (ülke şehirleri gibi)
     const world = document.getElementById("world");
     const locations = [
-      {x:100, y:150}, {x:500, y:200}, {x:800, y:300}, 
-      {x:300, y:400}, {x:700, y:500}, {x:200, y:600}
+      {x: 400, y: 200}, // Türkiye
+      {x: 650, y: 180}, // Rusya
+      {x: 200, y: 250}, // ABD
+      {x: 850, y: 300}, // Çin
+      {x: 900, y: 400}, // Japonya
+      {x: 450, y: 400}, // Afrika
     ];
 
     // Noktaları ekle
@@ -141,11 +124,11 @@
     // Terminal yazıları
     const terminal = document.getElementById("terminal");
     const hackLines = [
-      "[INFO] Global serverlara bağlanılıyor...",
-      "[TRACE] IP maskeleniyor...",
+      "[INFO] Global sunuculara bağlanılıyor...",
+      "[TRACE] IP maskeleme aktif...",
       "[ACCESS] Güvenlik duvarı geçildi.",
-      "[UPLOAD] Veriler dışarı aktarılıyor...",
-      "[ALERT] Şüpheli aktivite bulundu.",
+      "[UPLOAD] Veriler transfer ediliyor...",
+      "[ALERT] Şüpheli aktivite tespit edildi.",
       "[COMPLETE] Hack başarılı."
     ];
     function addLine() {
@@ -156,14 +139,6 @@
       terminal.scrollTop = terminal.scrollHeight;
     }
     setInterval(addLine, 1200);
-
-    // Sahte arama motoru enter
-    document.getElementById("searchBox").addEventListener("keydown", e=>{
-      if (e.key==="Enter") {
-        addLine("[SEARCH] '"+e.target.value+"' arandı...");
-        e.target.value="";
-      }
-    });
   </script>
 </body>
 </html>
