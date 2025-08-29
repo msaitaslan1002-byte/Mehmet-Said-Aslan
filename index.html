@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Tanrı'nın Gözü</title>
+  <title>Hack Terminal</title>
   <style>
     body {
       margin: 0;
@@ -13,32 +13,43 @@
     }
     canvas {
       display: block;
-    }
-    .overlay {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      color: red;
-      font-size: 22px;
-      font-weight: bold;
-      text-shadow: 0 0 15px red;
-      animation: pulse 1.5s infinite alternate;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
-    @keyframes pulse {
-      from { opacity: 0.4; }
+    .terminal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      padding: 20px;
+      color: #00ff00;
+      font-size: 16px;
+      z-index: 1;
+      text-shadow: 0 0 5px #0f0;
+    }
+    .line {
+      white-space: nowrap;
+      margin: 2px 0;
+      animation: fadein 1s linear forwards;
+    }
+    @keyframes fadein {
+      from { opacity: 0; }
       to { opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <div class="overlay">⚠ TANRI'NIN GÖZÜ AKTİF ⚠</div>
   <canvas id="matrix"></canvas>
+  <div class="terminal" id="terminal"></div>
 
   <script>
+    // MATRIX EFEKTİ
     const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
-
-    // Tam ekran boyut
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
 
@@ -46,12 +57,10 @@
     const fontSize = 16;
     const columns = canvas.width / fontSize;
 
-    // Her sütun için başlangıç y
     const drops = [];
     for (let x = 0; x < columns; x++) drops[x] = 1;
 
     function draw() {
-      // Yavaş silme efekti
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -62,15 +71,38 @@
         const text = letters.charAt(Math.floor(Math.random() * letters.length));
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-        // Rastgele reset
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
         drops[i]++;
       }
     }
-
     setInterval(draw, 35);
+
+    // TERMINAL YAZILAR
+    const terminal = document.getElementById("terminal");
+    const hackLines = [
+      "[ACCESS GRANTED] >> Sistem anahtarları alınıyor...",
+      ">> Kullanıcı bilgileri taranıyor...",
+      ">> Güvenlik duvarı bypass edildi.",
+      ">> IP adresi maskeleme aktif.",
+      ">> Şifreler brute-force ile kırılıyor...",
+      ">> Tüm veriler dışarı aktarılıyor...",
+      ">> *** HACK BAŞARILI ***"
+    ];
+
+    function addLine(text) {
+      const line = document.createElement("div");
+      line.className = "line";
+      line.textContent = text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight; // hep en alta insin
+    }
+
+    setInterval(() => {
+      const randomLine = hackLines[Math.floor(Math.random() * hackLines.length)];
+      addLine(randomLine);
+    }, 1000);
   </script>
 </body>
 </html>
