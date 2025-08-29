@@ -1,144 +1,159 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Global Hack Simulation</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: #00ff00;
-      font-family: monospace;
-      overflow: hidden;
-    }
-
-    /* Dünya haritası arka plan */
-    #world {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/2000px-World_map_-_low_resolution.svg.png")
-                  no-repeat center center;
-      background-size: cover;
-      overflow: hidden;
-      z-index: 0;
-      filter: brightness(0.3);
-    }
-
-    /* Noktalar */
-    .dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: red;
-      box-shadow: 0 0 8px red;
-      animation: blink 1.2s infinite alternate;
-    }
-    @keyframes blink {
-      from { opacity: 0.4; }
-      to { opacity: 1; }
-    }
-
-    /* Çizgiler */
-    .line {
-      position: absolute;
-      height: 2px;
-      background: lime;
-      box-shadow: 0 0 10px lime;
-      transform-origin: left center;
-    }
-
-    /* Terminal yazıları */
-    .terminal {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      max-height: 45%;
-      overflow: hidden;
-      padding: 10px;
-      color: #00ff00;
-      font-size: 15px;
-      z-index: 1;
-      background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    }
-    .terminal-line {
-      margin: 2px 0;
-      white-space: nowrap;
-      animation: fadein 1s linear forwards;
-      text-shadow: 0 0 5px #0f0;
-    }
-    @keyframes fadein {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>HACKED SYSTEM</title>
+<style>
+body {
+  margin:0; background:black; overflow:hidden; font-family:monospace; color:#0f0;
+}
+canvas{ display:block; position:absolute; top:0; left:0; z-index:1; }
+#terminal{
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  padding:20px; font-size:18px; color:#0f0; background:rgba(0,0,0,0.2);
+  z-index:2; overflow-y:auto;
+}
+.error-screen{
+  display:none; position:absolute; top:0; left:0; width:100%; height:100%;
+  background:red; color:white; font-size:60px; font-weight:bold; text-align:center;
+  padding-top:20%; z-index:5; animation:blink 0.3s infinite;
+}
+@keyframes blink{50%{opacity:0;}}
+@keyframes shake{
+  0%{transform:translate(0,0);}
+  25%{transform:translate(-10px,10px);}
+  50%{transform:translate(10px,-10px);}
+  75%{transform:translate(-10px,-10px);}
+  100%{transform:translate(10px,10px);}
+}
+.shake{animation:shake 0.1s infinite;}
+.glitch{
+  position:absolute; top:0; left:0; width:100%; height:100%; z-index:4; pointer-events:none;
+}
+.red-text{color:red; animation:blink 0.5s infinite;}
+.sms{
+  position:absolute; bottom:20px; right:20px; padding:10px;
+  background:#111; color:#0f0; border:2px solid red; z-index:6; font-weight:bold;
+  font-size:16px; display:none;
+  animation:blink 0.7s infinite;
+}
+</style>
 </head>
 <body>
-  <div id="world"></div>
-  <div class="terminal" id="terminal"></div>
+<canvas id="matrix"></canvas>
+<div id="terminal"></div>
+<div class="error-screen" id="error">SYSTEM ERROR</div>
+<div class="glitch" id="glitch"></div>
+<div class="sms" id="sms">[SMS SENT] Target number: +90XXXXXXXXX</div>
 
-  <script>
-    const world = document.getElementById("world");
-    const locations = [
-      {x: 400, y: 200}, // Türkiye
-      {x: 650, y: 180}, // Rusya
-      {x: 200, y: 250}, // ABD
-      {x: 850, y: 300}, // Çin
-      {x: 900, y: 400}, // Japonya
-      {x: 450, y: 400}, // Afrika
-    ];
+<!-- Sesler -->
+<audio id="bgm" src="https://cdn.pixabay.com/download/audio/2022/11/04/audio_8a0f546d2a.mp3?filename=horror-ambient-123254.mp3" loop></audio>
+<audio id="alarm" src="https://cdn.pixabay.com/download/audio/2021/09/16/audio_b8d2c63512.mp3?filename=alarm-10761.mp3"></audio>
 
-    // Noktaları ekle
-    locations.forEach(loc => {
-      const dot = document.createElement("div");
-      dot.className = "dot";
-      dot.style.left = loc.x + "px";
-      dot.style.top = loc.y + "px";
-      world.appendChild(dot);
-    });
+<script>
+// ===== MATRIX YAĞMURU =====
+const canvas=document.getElementById("matrix");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
-    // Rastgele hat çiz (ülkeler arası geçiş efekti)
-    function connect() {
-      const a = locations[Math.floor(Math.random()*locations.length)];
-      const b = locations[Math.floor(Math.random()*locations.length)];
-      if (a === b) return;
-      const line = document.createElement("div");
-      line.className = "line";
-      line.style.left = a.x+"px";
-      line.style.top = a.y+"px";
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const length = Math.sqrt(dx*dx+dy*dy);
-      line.style.width = length + "px";
-      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-      line.style.transform = "rotate("+angle+"deg)";
-      world.appendChild(line);
-      setTimeout(()=> line.remove(), 2000);
+const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&あいうえおアイウエオ";
+const fontSize=16;
+const columns=Math.floor(canvas.width/fontSize);
+const drops=Array(columns).fill(0).map(()=>Math.random()*canvas.height);
+
+function drawMatrix(){
+  ctx.fillStyle="rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#0F0";
+  ctx.font=fontSize+"px monospace";
+  for(let i=0;i<drops.length;i++){
+    const text=letters.charAt(Math.floor(Math.random()*letters.length));
+    ctx.fillText(text,i*fontSize,drops[i]);
+    drops[i]+=Math.random()*20;
+    if(drops[i]>canvas.height)drops[i]=0;
+  }
+}
+setInterval(drawMatrix,50);
+
+// ===== TERMINAL MESAJLARI =====
+const terminal=document.getElementById("terminal");
+const messages=[
+  "[ACCESS GRANTED]",
+  "[WARNING] Unauthorized access detected!",
+  "[LOADING] Injecting malicious code...",
+  "[INFO] Downloading account data...",
+  "[ALERT] System compromised!",
+  "[ACCESS DENIED] Security system triggered!",
+  "[SYSTEM FAILURE] Shutting down firewall...",
+  "[ERROR] Credentials leaked!",
+  "[MESSAGE] Sending fake SMS to target number...",
+  "[COMPLETE] Data breach successful!",
+  "[WARNING] Malware installed successfully!",
+  "[INFO] Network scan complete...",
+  "[ALERT] Firewall disabled!",
+  "[SYSTEM CRASH] Kernel panic detected!"
+];
+let i=0;
+function writeLine(){
+  if(i<messages.length){
+    const line=document.createElement("div");
+    line.textContent=messages[i];
+    if(Math.random()>0.7) line.classList.add("red-text");
+    line.style.opacity=0;
+    terminal.appendChild(line);
+    terminal.scrollTop=terminal.scrollHeight;
+    fadeIn(line);
+    i++;
+    setTimeout(writeLine, Math.random()*500+200);
+  }else{
+    document.body.classList.add("shake");
+    startGlitch();
+    showSMS();
+    setTimeout(()=>{
+      document.getElementById("error").style.display="block";
+      document.getElementById("alarm").play();
+    },3000);
+  }
+}
+function fadeIn(el){
+  let op=0;
+  const timer=setInterval(()=>{
+    if(op>=1){clearInterval(timer);}
+    el.style.opacity=op;
+    op+=0.05;
+  },30);
+}
+
+// ===== GLITCH / EKRAN BOZULMASI =====
+const glitchDiv=document.getElementById("glitch");
+function startGlitch(){
+  setInterval(()=>{
+    glitchDiv.innerHTML="";
+    for(let j=0;j<10;j++){
+      const span=document.createElement("span");
+      span.textContent=letters.charAt(Math.floor(Math.random()*letters.length));
+      span.style.position="absolute";
+      span.style.top=Math.random()*window.innerHeight+"px";
+      span.style.left=Math.random()*window.innerWidth+"px";
+      span.style.color=["red","#0F0","#FFF"][Math.floor(Math.random()*3)];
+      span.style.fontSize=(Math.random()*40+20)+"px";
+      glitchDiv.appendChild(span);
     }
-    setInterval(connect, 1000);
+  },100);
+}
 
-    // Terminal yazıları
-    const terminal = document.getElementById("terminal");
-    const hackLines = [
-      "[INFO] Global sunuculara bağlanılıyor...",
-      "[TRACE] IP maskeleme aktif...",
-      "[ACCESS] Güvenlik duvarı geçildi.",
-      "[UPLOAD] Veriler transfer ediliyor...",
-      "[ALERT] Şüpheli aktivite tespit edildi.",
-      "[COMPLETE] Hack başarılı."
-    ];
-    function addLine() {
-      const div = document.createElement("div");
-      div.className = "terminal-line";
-      div.textContent = hackLines[Math.floor(Math.random()*hackLines.length)];
-      terminal.appendChild(div);
-      terminal.scrollTop = terminal.scrollHeight;
-    }
-    setInterval(addLine, 1200);
-  </script>
+// ===== SAHTE SMS BİLDİRİMİ =====
+function showSMS(){
+  const sms=document.getElementById("sms");
+  sms.style.display="block";
+}
+
+// ===== BAŞLAT =====
+window.onload=()=>{
+  document.getElementById("bgm").play();
+  writeLine();
+};
+</script>
 </body>
 </html>
