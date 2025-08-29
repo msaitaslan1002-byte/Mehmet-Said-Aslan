@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Hack Terminal</title>
+  <title>Global Hack Simulation</title>
   <style>
     body {
       margin: 0;
@@ -11,30 +11,78 @@
       font-family: monospace;
       overflow: hidden;
     }
-    canvas {
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
-    }
-    .terminal {
+    /* Dünya animasyonu arka plan */
+    #world {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      background: radial-gradient(circle at center, #001 0%, #000 70%);
       overflow: hidden;
-      padding: 20px;
-      color: #00ff00;
-      font-size: 16px;
-      z-index: 1;
-      text-shadow: 0 0 5px #0f0;
+      z-index: 0;
+    }
+    .dot {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: red;
+      box-shadow: 0 0 8px red;
+      animation: blink 1.2s infinite alternate;
+    }
+    @keyframes blink {
+      from { opacity: 0.4; }
+      to { opacity: 1; }
     }
     .line {
-      white-space: nowrap;
+      position: absolute;
+      height: 2px;
+      background: lime;
+      box-shadow: 0 0 10px lime;
+      transform-origin: left center;
+    }
+
+    /* Arama motoru */
+    .search {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #0f0;
+      border-radius: 6px;
+      padding: 8px;
+    }
+    .search input {
+      background: black;
+      border: none;
+      outline: none;
+      color: #0f0;
+      font-size: 18px;
+      width: 300px;
+    }
+
+    /* Terminal yazıları */
+    .terminal {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-height: 40%;
+      overflow: hidden;
+      padding: 10px;
+      color: #00ff00;
+      font-size: 15px;
+      z-index: 1;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    }
+    .terminal-line {
       margin: 2px 0;
+      white-space: nowrap;
       animation: fadein 1s linear forwards;
+      text-shadow: 0 0 5px #0f0;
     }
     @keyframes fadein {
       from { opacity: 0; }
@@ -43,66 +91,79 @@
   </style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
+  <div id="world"></div>
+
+  <!-- Arama Motoru -->
+  <div class="search">
+    <input type="text" placeholder="Ara..." id="searchBox">
+  </div>
+
+  <!-- Terminal -->
   <div class="terminal" id="terminal"></div>
 
   <script>
-    // MATRIX EFEKTİ
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-
-    const drops = [];
-    for (let x = 0; x < columns; x++) drops[x] = 1;
-
-    function draw() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#0F0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-    setInterval(draw, 35);
-
-    // TERMINAL YAZILAR
-    const terminal = document.getElementById("terminal");
-    const hackLines = [
-      "[ACCESS GRANTED] >> Sistem anahtarları alınıyor...",
-      ">> Kullanıcı bilgileri taranıyor...",
-      ">> Güvenlik duvarı bypass edildi.",
-      ">> IP adresi maskeleme aktif.",
-      ">> Şifreler brute-force ile kırılıyor...",
-      ">> Tüm veriler dışarı aktarılıyor...",
-      ">> *** HACK BAŞARILI ***"
+    // Noktalar (ülke şehirleri gibi)
+    const world = document.getElementById("world");
+    const locations = [
+      {x:100, y:150}, {x:500, y:200}, {x:800, y:300}, 
+      {x:300, y:400}, {x:700, y:500}, {x:200, y:600}
     ];
 
-    function addLine(text) {
+    // Noktaları ekle
+    locations.forEach(loc => {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dot.style.left = loc.x + "px";
+      dot.style.top = loc.y + "px";
+      world.appendChild(dot);
+    });
+
+    // Rastgele hat çiz (ülkeler arası geçiş efekti)
+    function connect() {
+      const a = locations[Math.floor(Math.random()*locations.length)];
+      const b = locations[Math.floor(Math.random()*locations.length)];
+      if (a === b) return;
       const line = document.createElement("div");
       line.className = "line";
-      line.textContent = text;
-      terminal.appendChild(line);
-      terminal.scrollTop = terminal.scrollHeight; // hep en alta insin
+      line.style.left = a.x+"px";
+      line.style.top = a.y+"px";
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const length = Math.sqrt(dx*dx+dy*dy);
+      line.style.width = length + "px";
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      line.style.transform = "rotate("+angle+"deg)";
+      world.appendChild(line);
+      setTimeout(()=> line.remove(), 2000);
     }
+    setInterval(connect, 1000);
 
-    setInterval(() => {
-      const randomLine = hackLines[Math.floor(Math.random() * hackLines.length)];
-      addLine(randomLine);
-    }, 1000);
+    // Terminal yazıları
+    const terminal = document.getElementById("terminal");
+    const hackLines = [
+      "[INFO] Global serverlara bağlanılıyor...",
+      "[TRACE] IP maskeleniyor...",
+      "[ACCESS] Güvenlik duvarı geçildi.",
+      "[UPLOAD] Veriler dışarı aktarılıyor...",
+      "[ALERT] Şüpheli aktivite bulundu.",
+      "[COMPLETE] Hack başarılı."
+    ];
+    function addLine() {
+      const div = document.createElement("div");
+      div.className = "terminal-line";
+      div.textContent = hackLines[Math.floor(Math.random()*hackLines.length)];
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+    setInterval(addLine, 1200);
+
+    // Sahte arama motoru enter
+    document.getElementById("searchBox").addEventListener("keydown", e=>{
+      if (e.key==="Enter") {
+        addLine("[SEARCH] '"+e.target.value+"' arandı...");
+        e.target.value="";
+      }
+    });
   </script>
 </body>
 </html>
